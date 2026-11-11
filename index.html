@@ -1,51 +1,206 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="uk">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Цвета стоматологических установок</title>
+<title>Стоматологічна установка KLT 6220 A3</title>
 <style>
   body { font-family: Arial, sans-serif; margin: 0; padding: 16px; background: #f4f6f8; color: #222; }
   h1 { font-size: 22px; text-align: center; }
-  #gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 14px; max-width: 1000px; margin: 0 auto; }
-  .card { background: #fff; border-radius: 12px; padding: 10px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,.08); }
+  h2 { max-width: 1000px; margin: 24px auto 12px; font-size: 18px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 14px; max-width: 1000px; margin: 0 auto; }
+  .card { background: #fff; border-radius: 12px; padding: 10px; box-shadow: 0 2px 8px rgba(0,0,0,.08); }
   .card:target { outline: 3px solid #2a7de1; }
-  .card img { width: 100%; aspect-ratio: 4/3; object-fit: cover; border-radius: 8px; background: #eee; cursor: pointer; }
-  .card div { margin-top: 8px; font-weight: bold; }
+  .card img { width: 100%; aspect-ratio: 4/3; object-fit: cover; border-radius: 8px; background: #eee; cursor: pointer; display: block; }
+  .code { margin: 8px 0; font-weight: bold; text-align: center; }
+  .gift { display: flex; justify-content: space-between; gap: 6px; font-size: 13px; margin-top: 4px; }
+  .out img { filter: grayscale(1); opacity: .6; }
   #viewer { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.85); align-items: center; justify-content: center; z-index: 10; }
   #viewer img { max-width: 95%; max-height: 95%; border-radius: 8px; }
+  footer { max-width: 1000px; margin: 30px auto 0; text-align: right; height: 44px; }
+  #adm { width: 44px; height: 44px; opacity: 0; border: 0; background: transparent; cursor: default; }
+  .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.6); align-items: center; justify-content: center; z-index: 20; padding: 12px; }
+  .box { background: #fff; border-radius: 12px; padding: 20px; width: 100%; max-width: 360px; }
+  .box input[type=text], .box input[type=password] { width: 100%; box-sizing: border-box; padding: 10px; margin: 6px 0 12px; font-size: 16px; }
+  .box button { padding: 10px 16px; font-size: 15px; cursor: pointer; }
+  #panel .box { max-width: 560px; max-height: 90vh; overflow-y: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  th, td { padding: 6px 4px; text-align: center; border-bottom: 1px solid #eee; }
+  td:first-child, th:first-child { text-align: left; font-weight: bold; }
+  td input { width: 20px; height: 20px; }
+  #err { color: #c00; margin-bottom: 8px; display: none; }
 </style>
 </head>
 <body>
 <h1>Стоматологічна установка KLT 6220 A3</h1>
-<div id="gallery"></div>
+
+<h2>✅ В наявності</h2>
+<div class="grid" id="gridIn"></div>
+
+<h2>❌ Немає в наявності</h2>
+<div class="grid" id="gridOut"></div>
+
+<footer><button id="adm" aria-label=""></button></footer>
+
 <div id="viewer"><img alt=""></div>
+
+<div class="overlay" id="login">
+  <div class="box">
+    <div id="err">Невірний логін або пароль</div>
+    <input type="text" id="lg" placeholder="Логін" autocomplete="off">
+    <input type="password" id="pw" placeholder="Пароль" autocomplete="off">
+    <button id="enter">Увійти</button>
+    <button id="cancel">Скасувати</button>
+  </div>
+</div>
+
+<div class="overlay" id="panel">
+  <div class="box">
+    <h3>Адмін-панель</h3>
+    <table>
+      <thead><tr><th>Колір</th><th>В наявності</th><th>Стілець RS03</th><th>Подушки</th></tr></thead>
+      <tbody id="rows"></tbody>
+    </table>
+    <p><button id="close">Закрити</button></p>
+  </div>
+</div>
 
 <script>
   var TOTAL = 21;
-  var gallery = document.getElementById('gallery');
+  var DB = 'https://units-colors-default-rtdb.europe-west1.firebasedatabase.app/colors';
+  var LOGIN = '123';
+  var PASS = '123';
+
+  var data = {};
+  var cards = {};
+  var codes = [];
+  var gridIn = document.getElementById('gridIn');
+  var gridOut = document.getElementById('gridOut');
   var viewer = document.getElementById('viewer');
   var big = viewer.querySelector('img');
 
+  function has(code, f) { return !!(data[code] && data[code][f]); }
+  function mark(v) { return v ? '✅' : '❌'; }
+
+  function render() {
+    codes.forEach(function (code) {
+      var c = cards[code];
+      if (!c.ok) return;
+      var inStock = has(code, 'inStock');
+      (inStock ? gridIn : gridOut).appendChild(c.el);
+      c.el.className = 'card' + (inStock ? '' : ' out');
+      c.chair.textContent = mark(has(code, 'chair'));
+      c.pillows.textContent = mark(has(code, 'pillows'));
+    });
+  }
+
+  function save(code, field, value) {
+    if (!data[code]) data[code] = {};
+    data[code][field] = value;
+    render();
+    fetch(DB + '/' + code + '/' + field + '.json', { method: 'PUT', body: JSON.stringify(value) })
+      .catch(function () { alert('Не вдалося зберегти. Перевірте інтернет.'); });
+  }
+
+  function load() {
+    fetch(DB + '.json')
+      .then(function (r) { return r.json(); })
+      .then(function (d) { data = d || {}; render(); })
+      .catch(function () { render(); });
+  }
+
   for (var i = 1; i <= TOTAL; i++) {
-    var code = 'FS' + (i < 10 ? '0' + i : i);
-    var card = document.createElement('div');
-    card.className = 'card';
-    card.id = code;
-    card.style.display = 'none';
-    var img = document.createElement('img');
-    img.alt = code;
-    img.src = 'images/' + code + '.png';
-    img.onload = (function (c) { return function () { c.style.display = 'block'; if (location.hash === '#' + c.id) c.scrollIntoView(); }; })(card);
-    img.onclick = (function (im) { return function () { big.src = im.src; viewer.style.display = 'flex'; }; })(img);
-    var label = document.createElement('div');
-    label.textContent = code;
-    card.appendChild(img);
-    card.appendChild(label);
-    gallery.appendChild(card);
+    (function (code) {
+      codes.push(code);
+      var el = document.createElement('div');
+      el.className = 'card';
+      el.id = code;
+      el.style.display = 'none';
+
+      var img = document.createElement('img');
+      img.alt = code;
+      img.src = 'images/' + code + '.png';
+      img.onclick = function () { big.src = img.src; viewer.style.display = 'flex'; };
+
+      var title = document.createElement('div');
+      title.className = 'code';
+      title.textContent = code;
+
+      var r1 = document.createElement('div');
+      r1.className = 'gift';
+      var t1 = document.createElement('span');
+      t1.textContent = 'Стілець RS03 у подарунок';
+      var m1 = document.createElement('span');
+      r1.appendChild(t1); r1.appendChild(m1);
+
+      var r2 = document.createElement('div');
+      r2.className = 'gift';
+      var t2 = document.createElement('span');
+      t2.textContent = 'Подушки у подарунок';
+      var m2 = document.createElement('span');
+      r2.appendChild(t2); r2.appendChild(m2);
+
+      el.appendChild(img); el.appendChild(title); el.appendChild(r1); el.appendChild(r2);
+      cards[code] = { el: el, ok: false, chair: m1, pillows: m2 };
+      gridOut.appendChild(el);
+
+      img.onload = function () {
+        cards[code].ok = true;
+        el.style.display = 'block';
+        render();
+        if (location.hash === '#' + code) el.scrollIntoView();
+      };
+    })('FS' + (i < 10 ? '0' + i : i));
   }
 
   viewer.onclick = function () { viewer.style.display = 'none'; };
+
+  var loginBox = document.getElementById('login');
+  var panel = document.getElementById('panel');
+  var err = document.getElementById('err');
+
+  document.getElementById('adm').onclick = function () {
+    err.style.display = 'none';
+    document.getElementById('lg').value = '';
+    document.getElementById('pw').value = '';
+    loginBox.style.display = 'flex';
+  };
+  document.getElementById('cancel').onclick = function () { loginBox.style.display = 'none'; };
+
+  document.getElementById('enter').onclick = function () {
+    if (document.getElementById('lg').value === LOGIN && document.getElementById('pw').value === PASS) {
+      loginBox.style.display = 'none';
+      buildPanel();
+      panel.style.display = 'flex';
+    } else {
+      err.style.display = 'block';
+    }
+  };
+
+  document.getElementById('close').onclick = function () { panel.style.display = 'none'; };
+
+  function buildPanel() {
+    var rows = document.getElementById('rows');
+    rows.innerHTML = '';
+    codes.forEach(function (code) {
+      var tr = document.createElement('tr');
+      var td0 = document.createElement('td');
+      td0.textContent = code;
+      tr.appendChild(td0);
+      ['inStock', 'chair', 'pillows'].forEach(function (field) {
+        var td = document.createElement('td');
+        var cb = document.createElement('input');
+        cb.type = 'checkbox';
+        cb.checked = has(code, field);
+        cb.onchange = function () { save(code, field, cb.checked); };
+        td.appendChild(cb);
+        tr.appendChild(td);
+      });
+      rows.appendChild(tr);
+    });
+  }
+
+  load();
 </script>
 </body>
 </html>
