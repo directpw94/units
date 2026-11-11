@@ -121,3 +121,117 @@
     var v = document.createElement('span');
     r.appendChild(t);
     r.appendChild(v);
+    return { row: r, val: v };
+  }
+
+  for (var i = 1; i <= TOTAL; i++) {
+    (function (code) {
+      codes.push(code);
+      var el = document.createElement('div');
+      el.className = 'card';
+      el.id = code;
+      el.style.display = 'none';
+
+      var img = document.createElement('img');
+      img.alt = code;
+      img.src = 'images/' + code + '.png';
+      img.onclick = function () { big.src = img.src; viewer.style.display = 'flex'; };
+
+      var title = document.createElement('div');
+      title.className = 'code';
+      title.textContent = code;
+
+      var rq = row('Кількість');
+      rq.val.className = 'qty';
+      var r1 = row('Стілець RS03 у подарунок');
+      var r2 = row('Подушки у подарунок');
+
+      el.appendChild(img);
+      el.appendChild(title);
+      el.appendChild(rq.row);
+      el.appendChild(r1.row);
+      el.appendChild(r2.row);
+      cards[code] = { el: el, ok: false, qty: rq.val, chair: r1.val, pillows: r2.val };
+      gridOut.appendChild(el);
+
+      img.onload = function () {
+        cards[code].ok = true;
+        el.style.display = 'block';
+        render();
+        if (location.hash === '#' + code) el.scrollIntoView();
+      };
+    })('FS' + (i < 10 ? '0' + i : i));
+  }
+
+  viewer.onclick = function () { viewer.style.display = 'none'; };
+
+  var loginBox = document.getElementById('login');
+  var panel = document.getElementById('panel');
+  var err = document.getElementById('err');
+
+  document.getElementById('adm').onclick = function () {
+    err.style.display = 'none';
+    document.getElementById('lg').value = '';
+    document.getElementById('pw').value = '';
+    loginBox.style.display = 'flex';
+  };
+  document.getElementById('cancel').onclick = function () { loginBox.style.display = 'none'; };
+
+  document.getElementById('enter').onclick = function () {
+    if (document.getElementById('lg').value === LOGIN && document.getElementById('pw').value === PASS) {
+      loginBox.style.display = 'none';
+      buildPanel();
+      panel.style.display = 'flex';
+    } else {
+      err.style.display = 'block';
+    }
+  };
+
+  document.getElementById('close').onclick = function () { panel.style.display = 'none'; };
+
+  function checkbox(code, field) {
+    var td = document.createElement('td');
+    var cb = document.createElement('input');
+    cb.type = 'checkbox';
+    cb.checked = has(code, field);
+    cb.onchange = function () { save(code, field, cb.checked); };
+    td.appendChild(cb);
+    return td;
+  }
+
+  function buildPanel() {
+    var rows = document.getElementById('rows');
+    rows.innerHTML = '';
+    codes.forEach(function (code) {
+      var tr = document.createElement('tr');
+      var td0 = document.createElement('td');
+      td0.textContent = code;
+      tr.appendChild(td0);
+      tr.appendChild(checkbox(code, 'inStock'));
+
+      var tdq = document.createElement('td');
+      var inp = document.createElement('input');
+      inp.type = 'number';
+      inp.min = '0';
+      inp.max = '9999';
+      inp.value = num(code);
+      inp.onchange = function () {
+        var n = parseInt(inp.value, 10);
+        if (isNaN(n) || n < 0) n = 0;
+        if (n > 9999) n = 9999;
+        inp.value = n;
+        save(code, 'qty', n);
+      };
+      tdq.appendChild(inp);
+      tr.appendChild(tdq);
+
+      tr.appendChild(checkbox(code, 'chair'));
+      tr.appendChild(checkbox(code, 'pillows'));
+      rows.appendChild(tr);
+    });
+  }
+
+  load();
+</script>
+</body>
+</html>
