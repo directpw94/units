@@ -35,7 +35,7 @@
     card.style.display = 'none';
     var img = document.createElement('img');
     img.alt = code;
-    img.src = 'images/' + code + '.jpg';
+    img.src = 'images/' + code + '.png';
     img.onload = (function (c) { return function () { c.style.display = 'block'; if (location.hash === '#' + c.id) c.scrollIntoView(); }; })(card);
     img.onclick = (function (im) { return function () { big.src = im.src; viewer.style.display = 'flex'; }; })(img);
     var label = document.createElement('div');
