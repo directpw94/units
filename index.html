@@ -3,52 +3,49 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Стоматологические установки</title>
+<title>Цвета стоматологических установок</title>
 <style>
   body { font-family: Arial, sans-serif; margin: 0; padding: 16px; background: #f4f6f8; color: #222; }
   h1 { font-size: 22px; text-align: center; }
-  .model { background: #fff; border-radius: 12px; padding: 16px; margin: 16px auto; max-width: 900px; box-shadow: 0 2px 8px rgba(0,0,0,.08); }
-  .model:target { outline: 3px solid #2a7de1; }
-  .model h2 { margin-top: 0; font-size: 18px; }
-  .colors { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; }
-  .color { text-align: center; font-size: 14px; }
-  .color img { width: 100%; border-radius: 8px; background: #eee; aspect-ratio: 4/3; object-fit: cover; cursor: pointer; }
+  #gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 14px; max-width: 1000px; margin: 0 auto; }
+  .card { background: #fff; border-radius: 12px; padding: 10px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,.08); }
+  .card:target { outline: 3px solid #2a7de1; }
+  .card img { width: 100%; aspect-ratio: 4/3; object-fit: cover; border-radius: 8px; background: #eee; cursor: pointer; }
+  .card div { margin-top: 8px; font-weight: bold; }
   #viewer { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.85); align-items: center; justify-content: center; z-index: 10; }
   #viewer img { max-width: 95%; max-height: 95%; border-radius: 8px; }
 </style>
 </head>
 <body>
-<h1>🦷 Стоматологические установки</h1>
-
-<div class="model" id="model-a">
-  <h2>Модель A</h2>
-  <div class="colors">
-    <div class="color"><img src="images/model-a-blue.jpg" alt="Синий"><div>Синий</div></div>
-    <div class="color"><img src="images/model-a-white.jpg" alt="Белый"><div>Белый</div></div>
-    <div class="color"><img src="images/model-a-green.jpg" alt="Зелёный"><div>Зелёный</div></div>
-  </div>
-</div>
-
-<div class="model" id="model-b">
-  <h2>Модель B</h2>
-  <div class="colors">
-    <div class="color"><img src="images/model-b-blue.jpg" alt="Синий"><div>Синий</div></div>
-    <div class="color"><img src="images/model-b-white.jpg" alt="Белый"><div>Белый</div></div>
-  </div>
-</div>
-
+<h1>🦷 Цвета установок</h1>
+<div id="gallery"></div>
 <div id="viewer"><img alt=""></div>
 
 <script>
-  const viewer = document.getElementById('viewer');
-  const big = viewer.querySelector('img');
-  document.querySelectorAll('.color img').forEach(function (img) {
-    img.addEventListener('click', function () {
-      big.src = img.src;
-      viewer.style.display = 'flex';
-    });
-  });
-  viewer.addEventListener('click', function () { viewer.style.display = 'none'; });
+  var TOTAL = 21;
+  var gallery = document.getElementById('gallery');
+  var viewer = document.getElementById('viewer');
+  var big = viewer.querySelector('img');
+
+  for (var i = 1; i <= TOTAL; i++) {
+    var code = 'FS' + (i < 10 ? '0' + i : i);
+    var card = document.createElement('div');
+    card.className = 'card';
+    card.id = code;
+    card.style.display = 'none';
+    var img = document.createElement('img');
+    img.alt = code;
+    img.src = 'images/' + code + '.jpg';
+    img.onload = (function (c) { return function () { c.style.display = 'block'; if (location.hash === '#' + c.id) c.scrollIntoView(); }; })(card);
+    img.onclick = (function (im) { return function () { big.src = im.src; viewer.style.display = 'flex'; }; })(img);
+    var label = document.createElement('div');
+    label.textContent = code;
+    card.appendChild(img);
+    card.appendChild(label);
+    gallery.appendChild(card);
+  }
+
+  viewer.onclick = function () { viewer.style.display = 'none'; };
 </script>
 </body>
 </html>
