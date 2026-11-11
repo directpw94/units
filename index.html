@@ -18,8 +18,8 @@
   .out img { filter: grayscale(1); opacity: .6; }
   #viewer { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.85); align-items: center; justify-content: center; z-index: 10; }
   #viewer img { max-width: 95%; max-height: 95%; border-radius: 8px; }
-  footer { max-width: 1000px; margin: 30px auto 0; text-align: right; height: 44px; }
-  #adm { width: 44px; height: 44px; border: 0; padding: 0; cursor: default; background: linear-gradient(#000, #000) center / 1px 1px no-repeat; }
+  footer { max-width: 1000px; margin: 30px auto 0; display: flex; justify-content: flex-end; }
+  #adm { width: 44px; height: 44px; border: 0; padding: 0; margin: 0; cursor: pointer; background-color: transparent; background-image: linear-gradient(#000, #000); background-repeat: no-repeat; background-position: center; background-size: 1px 1px; }
   .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.6); align-items: center; justify-content: center; z-index: 20; padding: 12px; }
   .box { background: #fff; border-radius: 12px; padding: 20px; width: 100%; max-width: 360px; }
   .box input[type=text], .box input[type=password] { width: 100%; box-sizing: border-box; padding: 10px; margin: 6px 0 12px; font-size: 16px; }
@@ -141,16 +141,16 @@
       title.className = 'code';
       title.textContent = code;
 
-      var rq = row('Кількість');
-      rq.val.className = 'qty';
       var r1 = row('Стілець RS03 у подарунок');
       var r2 = row('Подушки у подарунок');
+      var rq = row('Кількість');
+      rq.val.className = 'qty';
 
       el.appendChild(img);
       el.appendChild(title);
-      el.appendChild(rq.row);
       el.appendChild(r1.row);
       el.appendChild(r2.row);
+      el.appendChild(rq.row);
       cards[code] = { el: el, ok: false, qty: rq.val, chair: r1.val, pillows: r2.val };
       gridOut.appendChild(el);
 
