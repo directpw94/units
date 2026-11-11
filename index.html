@@ -14,6 +14,7 @@
   .card img { width: 100%; aspect-ratio: 4/3; object-fit: cover; border-radius: 8px; background: #eee; cursor: pointer; display: block; }
   .code { margin: 8px 0; font-weight: bold; text-align: center; }
   .gift { display: flex; justify-content: space-between; gap: 6px; font-size: 13px; margin-top: 4px; }
+  .qty { font-weight: bold; }
   .out img { filter: grayscale(1); opacity: .6; }
   #viewer { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.85); align-items: center; justify-content: center; z-index: 10; }
   #viewer img { max-width: 95%; max-height: 95%; border-radius: 8px; }
@@ -23,11 +24,12 @@
   .box { background: #fff; border-radius: 12px; padding: 20px; width: 100%; max-width: 360px; }
   .box input[type=text], .box input[type=password] { width: 100%; box-sizing: border-box; padding: 10px; margin: 6px 0 12px; font-size: 16px; }
   .box button { padding: 10px 16px; font-size: 15px; cursor: pointer; }
-  #panel .box { max-width: 560px; max-height: 90vh; overflow-y: auto; }
+  #panel .box { max-width: 640px; max-height: 90vh; overflow-y: auto; }
   table { width: 100%; border-collapse: collapse; font-size: 14px; }
   th, td { padding: 6px 4px; text-align: center; border-bottom: 1px solid #eee; }
   td:first-child, th:first-child { text-align: left; font-weight: bold; }
-  td input { width: 20px; height: 20px; }
+  td input[type=checkbox] { width: 20px; height: 20px; }
+  td input[type=number] { width: 60px; padding: 4px; font-size: 14px; }
   #err { color: #c00; margin-bottom: 8px; display: none; }
 </style>
 </head>
@@ -58,7 +60,7 @@
   <div class="box">
     <h3>Адмін-панель</h3>
     <table>
-      <thead><tr><th>Колір</th><th>В наявності</th><th>Стілець RS03</th><th>Подушки</th></tr></thead>
+      <thead><tr><th>Колір</th><th>В наявності</th><th>Кількість</th><th>Стілець RS03</th><th>Подушки</th></tr></thead>
       <tbody id="rows"></tbody>
     </table>
     <p><button id="close">Закрити</button></p>
@@ -80,6 +82,7 @@
   var big = viewer.querySelector('img');
 
   function has(code, f) { return !!(data[code] && data[code][f]); }
+  function num(code) { return (data[code] && typeof data[code].qty === 'number') ? data[code].qty : 0; }
   function mark(v) { return v ? '✅' : '❌'; }
 
   function render() {
@@ -89,6 +92,7 @@
       var inStock = has(code, 'inStock');
       (inStock ? gridIn : gridOut).appendChild(c.el);
       c.el.className = 'card' + (inStock ? '' : ' out');
+      c.qty.textContent = num(code);
       c.chair.textContent = mark(has(code, 'chair'));
       c.pillows.textContent = mark(has(code, 'pillows'));
     });
@@ -109,98 +113,11 @@
       .catch(function () { render(); });
   }
 
-  for (var i = 1; i <= TOTAL; i++) {
-    (function (code) {
-      codes.push(code);
-      var el = document.createElement('div');
-      el.className = 'card';
-      el.id = code;
-      el.style.display = 'none';
-
-      var img = document.createElement('img');
-      img.alt = code;
-      img.src = 'images/' + code + '.png';
-      img.onclick = function () { big.src = img.src; viewer.style.display = 'flex'; };
-
-      var title = document.createElement('div');
-      title.className = 'code';
-      title.textContent = code;
-
-      var r1 = document.createElement('div');
-      r1.className = 'gift';
-      var t1 = document.createElement('span');
-      t1.textContent = 'Стілець RS03 у подарунок';
-      var m1 = document.createElement('span');
-      r1.appendChild(t1); r1.appendChild(m1);
-
-      var r2 = document.createElement('div');
-      r2.className = 'gift';
-      var t2 = document.createElement('span');
-      t2.textContent = 'Подушки у подарунок';
-      var m2 = document.createElement('span');
-      r2.appendChild(t2); r2.appendChild(m2);
-
-      el.appendChild(img); el.appendChild(title); el.appendChild(r1); el.appendChild(r2);
-      cards[code] = { el: el, ok: false, chair: m1, pillows: m2 };
-      gridOut.appendChild(el);
-
-      img.onload = function () {
-        cards[code].ok = true;
-        el.style.display = 'block';
-        render();
-        if (location.hash === '#' + code) el.scrollIntoView();
-      };
-    })('FS' + (i < 10 ? '0' + i : i));
-  }
-
-  viewer.onclick = function () { viewer.style.display = 'none'; };
-
-  var loginBox = document.getElementById('login');
-  var panel = document.getElementById('panel');
-  var err = document.getElementById('err');
-
-  document.getElementById('adm').onclick = function () {
-    err.style.display = 'none';
-    document.getElementById('lg').value = '';
-    document.getElementById('pw').value = '';
-    loginBox.style.display = 'flex';
-  };
-  document.getElementById('cancel').onclick = function () { loginBox.style.display = 'none'; };
-
-  document.getElementById('enter').onclick = function () {
-    if (document.getElementById('lg').value === LOGIN && document.getElementById('pw').value === PASS) {
-      loginBox.style.display = 'none';
-      buildPanel();
-      panel.style.display = 'flex';
-    } else {
-      err.style.display = 'block';
-    }
-  };
-
-  document.getElementById('close').onclick = function () { panel.style.display = 'none'; };
-
-  function buildPanel() {
-    var rows = document.getElementById('rows');
-    rows.innerHTML = '';
-    codes.forEach(function (code) {
-      var tr = document.createElement('tr');
-      var td0 = document.createElement('td');
-      td0.textContent = code;
-      tr.appendChild(td0);
-      ['inStock', 'chair', 'pillows'].forEach(function (field) {
-        var td = document.createElement('td');
-        var cb = document.createElement('input');
-        cb.type = 'checkbox';
-        cb.checked = has(code, field);
-        cb.onchange = function () { save(code, field, cb.checked); };
-        td.appendChild(cb);
-        tr.appendChild(td);
-      });
-      rows.appendChild(tr);
-    });
-  }
-
-  load();
-</script>
-</body>
-</html>
+  function row(label) {
+    var r = document.createElement('div');
+    r.className = 'gift';
+    var t = document.createElement('span');
+    t.textContent = label;
+    var v = document.createElement('span');
+    r.appendChild(t);
+    r.appendChild(v);
