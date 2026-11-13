@@ -1,27 +1,110 @@
+
 <!DOCTYPE html>
 <html lang="uk">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Стоматологічна установка KLT 6220 A3</title>
+
 <style>
-  body { font-family: Arial, sans-serif; margin: 0; padding: 16px; background: #f4f6f8; color: #222; }
-  h1 { font-size: 22px; text-align: center; }
-  h2 { max-width: 1000px; margin: 24px auto 12px; font-size: 18px; }
-  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 14px; max-width: 1000px; margin: 0 auto; }
-  .card { background: #fff; border-radius: 12px; padding: 10px; box-shadow: 0 2px 8px rgba(0,0,0,.08); }
-  .card:target { outline: 3px solid #2a7de1; }
-  .card img { width: 100%; aspect-ratio: 4/3; object-fit: cover; border-radius: 8px; background: #eee; cursor: pointer; display: block; }
-  .code { margin: 8px 0; font-weight: bold; text-align: center; }
-  .gift { display: flex; justify-content: space-between; gap: 6px; font-size: 13px; margin-top: 4px; }
-  .qty { font-weight: bold; }
-  .out img { filter: grayscale(1); opacity: .6; }
-  .msg { max-width: 1000px; margin: 0 auto; color: #666; text-align: center; }
-  #viewer { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.85); align-items: center; justify-content: center; z-index: 10; }
-  #viewer img { max-width: 95%; max-height: 95%; border-radius: 8px; }
+body {
+ font-family: Arial, sans-serif;
+ margin: 0;
+ padding: 16px;
+ background: #f4f6f8;
+ color: #222;
+}
+
+h1 {
+ font-size: 22px;
+ text-align: center;
+}
+
+h2 {
+ max-width: 1000px;
+ margin: 24px auto 12px;
+ font-size: 18px;
+}
+
+.grid {
+ display: grid;
+ grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+ gap: 14px;
+ max-width: 1000px;
+ margin: 0 auto;
+}
+
+.card {
+ background: #fff;
+ border-radius: 12px;
+ padding: 10px;
+ box-shadow: 0 2px 8px rgba(0,0,0,.08);
+}
+
+.card:target {
+ outline: 3px solid #2a7de1;
+}
+
+.card img {
+ width: 100%;
+ aspect-ratio: 4/3;
+ object-fit: cover;
+ border-radius: 8px;
+ background: #eee;
+ cursor: pointer;
+ display: block;
+}
+
+.code {
+ margin: 8px 0;
+ font-weight: bold;
+ text-align: center;
+}
+
+.gift {
+ display: flex;
+ justify-content: space-between;
+ gap: 6px;
+ font-size: 13px;
+ margin-top: 4px;
+}
+
+.qty {
+ font-weight: bold;
+}
+
+.out img {
+ filter: grayscale(1);
+ opacity: .6;
+}
+
+.msg {
+ max-width: 1000px;
+ margin: 0 auto;
+ color: #666;
+ text-align: center;
+}
+
+#viewer {
+ display: none;
+ position: fixed;
+ inset: 0;
+ background: rgba(0,0,0,.85);
+ align-items: center;
+ justify-content: center;
+ z-index: 10;
+}
+
+#viewer img {
+ max-width: 95%;
+ max-height: 95%;
+ border-radius: 8px;
+}
 </style>
 </head>
+
 <body>
+
 <h1>Стоматологічна установка KLT 6220 A3</h1>
 
 <h2>✅ В наявності</h2>
@@ -32,161 +115,286 @@
 
 <div class="msg" id="msg">Завантаження...</div>
 
-<div id="viewer"><img alt=""></div>
+<div id="viewer">
+ <img alt="">
+</div>
 
 <script>
-  var TOTAL = 21;
-  var SHEET_ID = '1K6x-_NK_KGnS7ssoMqQGN4pOUBnbEcOd3_xaRcHGQ50';
-  var UNIT_ARTICLES = ['KLT 6220 A3 L', 'KLT 6220 A3 T', 'KLT 6220 A3 KH'];
-  var SWAP_ARTICLE = 'RV103-3 SH LE';
 
-  var data = {};
-  var ready = false;
-  var cards = {};
-  var codes = [];
-  var gridIn = document.getElementById('gridIn');
-  var gridOut = document.getElementById('gridOut');
-  var viewer = document.getElementById('viewer');
-  var big = viewer.querySelector('img');
-  viewer.onclick = function () { viewer.style.display = 'none'; };
+var TOTAL = 21;
 
-  function sheetUrl(name) {
-    return 'https://docs.google.com/spreadsheets/d/' + SHEET_ID + '/gviz/tq?tqx=out:csv&sheet=' + encodeURIComponent(name);
-  }
+var SHEET_ID = '1K6x-_NK_KGnS7ssoMqQGN4pOUBnbEcOd3_xaRcHGQ50';
 
-  function parseCSV(text) {
-    var rows = [], row = [], field = '', inQ = false;
-    for (var i = 0; i < text.length; i++) {
-      var ch = text[i];
-      if (inQ) {
-        if (ch === '"') {
-          if (text[i + 1] === '"') { field += '"'; i++; } else { inQ = false; }
-        } else { field += ch; }
-      } else if (ch === '"') { inQ = true; }
-      else if (ch === ',') { row.push(field); field = ''; }
-      else if (ch === '\n') { row.push(field); rows.push(row); row = []; field = ''; }
-      else if (ch !== '\r') { field += ch; }
+var SHEET_NAME = 'data';
+
+var data = {};
+var ready = false;
+var cards = {};
+var codes = [];
+
+var gridIn = document.getElementById('gridIn');
+var gridOut = document.getElementById('gridOut');
+
+var viewer = document.getElementById('viewer');
+var big = viewer.querySelector('img');
+
+viewer.onclick = function () {
+ viewer.style.display = 'none';
+};
+
+function sheetUrl() {
+ return 'https://docs.google.com/spreadsheets/d/'
+ + SHEET_ID
+ + '/gviz/tq?tqx=out:csv&sheet='
+ + encodeURIComponent(SHEET_NAME);
+}
+
+function parseCSV(text) {
+ var rows = [];
+ var row = [];
+ var field = '';
+ var inQ = false;
+
+ for (var i = 0; i < text.length; i++) {
+  var ch = text[i];
+
+  if (inQ) {
+   if (ch === '"') {
+    if (text[i + 1] === '"') {
+     field += '"';
+     i++;
+    } else {
+     inQ = false;
     }
-    if (field.length || row.length) { row.push(field); rows.push(row); }
-    return rows;
+   } else {
+    field += ch;
+   }
+  } else if (ch === '"') {
+   inQ = true;
+  } else if (ch === ',') {
+   row.push(field);
+   field = '';
+  } else if (ch === '\n') {
+   row.push(field);
+   rows.push(row);
+   row = [];
+   field = '';
+  } else if (ch !== '\r') {
+   field += ch;
   }
+ }
 
-  function norm(s) { return (s || '').replace(/\s+/g, ' ').trim().toUpperCase(); }
-  function colorCode(s) { return (s || '').replace(/\s+/g, '').toUpperCase(); }
-  function toNum(s) {
-    var n = parseFloat((s || '').replace(/\s/g, '').replace(',', '.'));
-    return isNaN(n) ? 0 : n;
-  }
-  function mark(v) { return v ? '✅' : '❌'; }
+ if (field.length || row.length) {
+  row.push(field);
+  rows.push(row);
+ }
 
-  function fetchSheet(name) {
-    return fetch(sheetUrl(name)).then(function (r) {
-      if (!r.ok) throw new Error(name);
-      return r.text();
-    }).then(parseCSV);
-  }
+ return rows;
+}
 
-  function entry(code) {
-    if (!data[code]) data[code] = { avail: 0, chairs: 0, pillows: 0 };
-    return data[code];
-  }
+function norm(s) {
+ return (s || '')
+  .replace(/\s+/g, ' ')
+  .trim()
+  .toUpperCase();
+}
 
-  function collect(unitRows, swapRows) {
-    data = {};
-    unitRows.slice(1).forEach(function (r) {
-      if (UNIT_ARTICLES.indexOf(norm(r[1])) === -1) return;
-      var p = toNum(r[15]);
-      if (p !== 1) return;
-      var code = colorCode(r[3]);
-      if (!code) return;
-      var e = entry(code);
-      e.avail += p;
-      e.chairs += toNum(r[10]);
-      e.pillows += toNum(r[11]);
-    });
-    swapRows.slice(1).forEach(function (r) {
-      if (norm(r[1]) !== SWAP_ARTICLE) return;
-      var code = colorCode(r[4]);
-      if (!code) return;
-      var e = entry(code);
-      e.avail += toNum(r[0]);
-      e.pillows += toNum(r[14]);
-    });
-  }
+function colorCode(s) {
+ return (s || '')
+  .replace(/\s+/g, '')
+  .toUpperCase();
+}
 
-  function render() {
-    codes.forEach(function (code) {
-      var c = cards[code];
-      var d = data[code] || { avail: 0, chairs: 0, pillows: 0 };
-      var inStock = d.avail > 0;
-      c.el.className = 'card' + (inStock ? '' : ' out');
-      c.qty.textContent = Math.min(d.chairs, d.pillows);
-      c.chair.textContent = mark(d.chairs > 0);
-      c.pillows.textContent = mark(d.pillows > 0);
-      (inStock ? gridIn : gridOut).appendChild(c.el);
-      c.el.style.display = (ready && c.ok) ? 'block' : 'none';
-    });
-  }
+function toNum(s) {
+ var n = parseFloat(
+  (s || '')
+   .replace(/\s/g, '')
+   .replace(',', '.')
+ );
 
-  function row(label) {
-    var r = document.createElement('div');
-    r.className = 'gift';
-    var t = document.createElement('span');
-    t.textContent = label;
-    var v = document.createElement('span');
-    r.appendChild(t);
-    r.appendChild(v);
-    return { row: r, val: v };
-  }
+ return isNaN(n) ? 0 : n;
+}
 
-  for (var i = 1; i <= TOTAL; i++) {
-    (function (code) {
-      codes.push(code);
-      var el = document.createElement('div');
-      el.className = 'card';
-      el.id = code;
-      el.style.display = 'none';
+function mark(v) {
+ return v > 0 ? '✅' : '❌';
+}
 
-      var img = document.createElement('img');
-      img.alt = code;
-      img.src = 'images/' + code + '.png';
-      img.onclick = function () { big.src = img.src; viewer.style.display = 'flex'; };
+function fetchSheet() {
+ return fetch(sheetUrl())
+  .then(function (r) {
+   if (!r.ok) {
+    throw new Error('Ошибка загрузки таблицы');
+   }
 
-      var title = document.createElement('div');
-      title.className = 'code';
-      title.textContent = code;
+   return r.text();
+  })
+  .then(parseCSV);
+}
 
-      var r1 = row('Стілець RS03 у подарунок');
-      var r2 = row('Подушки у подарунок');
-      var rq = row('Кількість повних комплектів з подушкою та стільцем');
-      rq.val.className = 'qty';
+function collect(rows) {
 
-      el.appendChild(img);
-      el.appendChild(title);
-      el.appendChild(r1.row);
-      el.appendChild(r2.row);
-      el.appendChild(rq.row);
-      cards[code] = { el: el, ok: false, qty: rq.val, chair: r1.val, pillows: r2.val };
-      gridOut.appendChild(el);
+ data = {};
 
-      img.onload = function () {
-        cards[code].ok = true;
-        render();
-        if (ready && location.hash === '#' + code) el.scrollIntoView();
-      };
-    })('FS' + (i < 10 ? '0' + i : i));
-  }
+ rows.slice(1).forEach(function (r) {
 
-  Promise.all([fetchSheet('Установки'), fetchSheet('Сменные')])
-    .then(function (res) {
-      collect(res[0], res[1]);
-      ready = true;
-      document.getElementById('msg').style.display = 'none';
-      render();
-    })
-    .catch(function () {
-      document.getElementById('msg').textContent = 'Не вдалося завантажити дані';
-    });
+  var code = colorCode(r[0]);
+
+  if (!/^FS\d{2}$/.test(code)) return;
+
+  var count = toNum(r[1]);
+  var val01 = toNum(r[2]);
+  var rs03 = toNum(r[3]);
+
+  data[code] = {
+   avail: count,
+   pillows: val01,
+   chairs: rs03
+  };
+
+ });
+
+}
+
+function render() {
+
+ codes.forEach(function (code) {
+
+  var c = cards[code];
+
+  var d = data[code] || {
+   avail: 0,
+   pillows: 0,
+   chairs: 0
+  };
+
+  var inStock = d.avail > 0;
+
+  c.el.className = 'card' + (inStock ? '' : ' out');
+
+  c.qty.textContent = Math.min(d.pillows, d.chairs);
+
+  c.val01.textContent = mark(d.pillows);
+
+  c.rs03.textContent = mark(d.chairs);
+
+  (inStock ? gridIn : gridOut).appendChild(c.el);
+
+  c.el.style.display = (ready && c.ok) ? 'block' : 'none';
+
+ });
+
+}
+
+function row(label) {
+
+ var r = document.createElement('div');
+ r.className = 'gift';
+
+ var t = document.createElement('span');
+ t.textContent = label;
+
+ var v = document.createElement('span');
+
+ r.appendChild(t);
+ r.appendChild(v);
+
+ return {
+  row: r,
+  val: v
+ };
+
+}
+
+for (var i = 1; i <= TOTAL; i++) {
+
+ (function (code) {
+
+  codes.push(code);
+
+  var el = document.createElement('div');
+  el.className = 'card';
+  el.id = code;
+  el.style.display = 'none';
+
+  var img = document.createElement('img');
+
+  img.alt = code;
+  img.src = 'images/' + code + '.png';
+
+  img.onclick = function () {
+   big.src = img.src;
+   viewer.style.display = 'flex';
+  };
+
+  var title = document.createElement('div');
+  title.className = 'code';
+  title.textContent = code;
+
+  var r1 = row('VAL01 у подарунок');
+  var r2 = row('RS03 у подарунок');
+
+  var rq = row('Кількість повних комплектів VAL01 + RS03');
+  rq.val.className = 'qty';
+
+  el.appendChild(img);
+  el.appendChild(title);
+  el.appendChild(r1.row);
+  el.appendChild(r2.row);
+  el.appendChild(rq.row);
+
+  cards[code] = {
+   el: el,
+   ok: false,
+   qty: rq.val,
+   val01: r1.val,
+   rs03: r2.val
+  };
+
+  gridOut.appendChild(el);
+
+  img.onload = function () {
+
+   cards[code].ok = true;
+
+   render();
+
+   if (ready && location.hash === '#' + code) {
+    el.scrollIntoView();
+   }
+
+  };
+
+  img.onerror = function () {
+   cards[code].ok = false;
+   el.style.display = 'none';
+  };
+
+ })('FS' + (i < 10 ? '0' + i : i));
+
+}
+
+fetchSheet()
+ .then(function (rows) {
+
+  collect(rows);
+
+  ready = true;
+
+  document.getElementById('msg').style.display = 'none';
+
+  render();
+
+ })
+ .catch(function (error) {
+
+  console.error(error);
+
+  document.getElementById('msg').textContent =
+   'Не вдалося завантажити дані';
+
+ });
+
 </script>
+
 </body>
 </html>
