@@ -329,11 +329,12 @@ for (var i = 1; i <= TOTAL; i++) {
   var title = document.createElement('div');
   title.className = 'code';
   title.textContent = code;
+  
+  
+  var r2 = row('Стілець RS03 у подарунок');
+  var r1 = row('Подушки у подарунок');
 
-  var r1 = row('VAL01 у подарунок');
-  var r2 = row('RS03 у подарунок');
-
-  var rq = row('Кількість повних комплектів VAL01 + RS03');
+  var rq = row('Кількість повних комплектів з подушками та стільцем');
   rq.val.className = 'qty';
 
   el.appendChild(img);
