@@ -87,12 +87,8 @@
   }
 
   function entry(code) {
-    if (!data[code]) data[code] = { color: 0, chairs: 0, pillows: 0 };
+    if (!data[code]) data[code] = { free: false, chair: false, pillows: false, kits: 0 };
     return data[code];
-  }
-
-  function kits(d) {
-    return Math.min(d.color, d.chairs, d.pillows);
   }
 
   function collect(unitRows, swapRows) {
@@ -103,30 +99,36 @@
       var code = colorCode(r[3]);
       if (!code) return;
       var e = entry(code);
-      e.color += 1;
-      if ((r[10] || '').trim() === '1') e.chairs += 1;
-      if ((r[11] || '').trim() === '1') e.pillows += 1;
+      var chair = (r[10] || '').trim() === '1';
+      var pillows = (r[11] || '').trim() === '1';
+      e.free = true;
+      if (chair) e.chair = true;
+      if (pillows) e.pillows = true;
+      if (chair && pillows) e.kits += 1;
     });
     swapRows.slice(1).forEach(function (r) {
       if (norm(r[1]) !== SWAP_ARTICLE) return;
-      var q = toNum(r[0]);
-      if (q <= 0) return;
+      var a = toNum(r[0]);
+      if (a <= 0) return;
       var code = colorCode(r[4]);
       if (!code) return;
-      entry(code).color += q;
+      var e = entry(code);
+      var k = Math.min(a, toNum(r[14]));
+      e.free = true;
+      e.kits += k;
+      if (k > 0) { e.chair = true; e.pillows = true; }
     });
   }
 
   function render() {
     codes.forEach(function (code) {
       var c = cards[code];
-      var d = data[code] || { color: 0, chairs: 0, pillows: 0 };
-      var inStock = d.color > 0;
-      c.el.className = 'card' + (inStock ? '' : ' out');
-      c.qty.textContent = kits(d);
-      c.chair.textContent = mark(d.chairs > 0);
-      c.pillows.textContent = mark(d.pillows > 0);
-      (inStock ? gridIn : gridOut).appendChild(c.el);
+      var d = data[code] || { free: false, chair: false, pillows: false, kits: 0 };
+      c.el.className = 'card' + (d.free ? '' : ' out');
+      c.qty.textContent = d.kits;
+      c.chair.textContent = mark(d.chair);
+      c.pillows.textContent = mark(d.pillows);
+      (d.free ? gridIn : gridOut).appendChild(c.el);
       c.el.style.display = (ready && c.ok) ? 'block' : 'none';
     });
   }
