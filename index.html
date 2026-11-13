@@ -87,8 +87,12 @@
   }
 
   function entry(code) {
-    if (!data[code]) data[code] = { qty: 0, chair: false, pillows: false };
+    if (!data[code]) data[code] = { color: 0, chairs: 0, pillows: 0 };
     return data[code];
+  }
+
+  function kits(d) {
+    return Math.min(d.color, d.chairs, d.pillows);
   }
 
   function collect(unitRows, swapRows) {
@@ -99,9 +103,9 @@
       var code = colorCode(r[3]);
       if (!code) return;
       var e = entry(code);
-      e.qty += 1;
-      if ((r[10] || '').trim() === '1') e.chair = true;
-      if ((r[11] || '').trim() === '1') e.pillows = true;
+      e.color += 1;
+      if ((r[10] || '').trim() === '1') e.chairs += 1;
+      if ((r[11] || '').trim() === '1') e.pillows += 1;
     });
     swapRows.slice(1).forEach(function (r) {
       if (norm(r[1]) !== SWAP_ARTICLE) return;
@@ -109,19 +113,19 @@
       if (q <= 0) return;
       var code = colorCode(r[4]);
       if (!code) return;
-      entry(code).qty += q;
+      entry(code).color += q;
     });
   }
 
   function render() {
     codes.forEach(function (code) {
       var c = cards[code];
-      var d = data[code];
-      var inStock = !!(d && d.qty > 0);
+      var d = data[code] || { color: 0, chairs: 0, pillows: 0 };
+      var inStock = d.color > 0;
       c.el.className = 'card' + (inStock ? '' : ' out');
-      c.qty.textContent = inStock ? d.qty : 0;
-      c.chair.textContent = mark(inStock && d.chair);
-      c.pillows.textContent = mark(inStock && d.pillows);
+      c.qty.textContent = kits(d);
+      c.chair.textContent = mark(d.chairs > 0);
+      c.pillows.textContent = mark(d.pillows > 0);
       (inStock ? gridIn : gridOut).appendChild(c.el);
       c.el.style.display = (ready && c.ok) ? 'block' : 'none';
     });
