@@ -10,10 +10,12 @@
   h2 { max-width: 1000px; margin: 24px auto 12px; font-size: 18px; }
   .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 14px; max-width: 1000px; margin: 0 auto; }
   .card { background: #fff; border-radius: 12px; padding: 10px; box-shadow: 0 2px 8px rgba(0,0,0,.08); }
+  .card:target { outline: 3px solid #2a7de1; }
   .card img { width: 100%; aspect-ratio: 4/3; object-fit: cover; border-radius: 8px; background: #eee; cursor: pointer; display: block; }
   .code { margin: 8px 0; font-weight: bold; text-align: center; }
   .gift { display: flex; justify-content: space-between; gap: 6px; font-size: 13px; margin-top: 4px; }
   .qty { font-weight: bold; }
+  .out img { filter: grayscale(1); opacity: .6; }
   .msg { max-width: 1000px; margin: 0 auto; color: #666; text-align: center; }
   #viewer { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.85); align-items: center; justify-content: center; z-index: 10; }
   #viewer img { max-width: 95%; max-height: 95%; border-radius: 8px; }
@@ -22,21 +24,28 @@
 <body>
 <h1>Стоматологічна установка KLT 6220 A3</h1>
 
-<h2>🦷 Установки в наявності</h2>
-<div class="grid" id="gridUnits"></div>
-<div class="msg" id="msgUnits">Завантаження...</div>
+<h2>✅ В наявності</h2>
+<div class="grid" id="gridIn"></div>
 
-<h2>🔄 Змінні в наявності</h2>
-<div class="grid" id="gridSwap"></div>
-<div class="msg" id="msgSwap">Завантаження...</div>
+<h2>❌ Немає в наявності</h2>
+<div class="grid" id="gridOut"></div>
+
+<div class="msg" id="msg">Завантаження...</div>
 
 <div id="viewer"><img alt=""></div>
 
 <script>
+  var TOTAL = 21;
   var SHEET_ID = '1K6x-_NK_KGnS7ssoMqQGN4pOUBnbEcOd3_xaRcHGQ50';
   var UNIT_ARTICLES = ['KLT 6220 A3 L', 'KLT 6220 A3 T'];
   var SWAP_ARTICLE = 'RV103-3 SH LE';
 
+  var data = {};
+  var ready = false;
+  var cards = {};
+  var codes = [];
+  var gridIn = document.getElementById('gridIn');
+  var gridOut = document.getElementById('gridOut');
   var viewer = document.getElementById('viewer');
   var big = viewer.querySelector('img');
   viewer.onclick = function () { viewer.style.display = 'none'; };
@@ -77,92 +86,106 @@
     }).then(parseCSV);
   }
 
-  function row(label, value, cls) {
+  function entry(code) {
+    if (!data[code]) data[code] = { qty: 0, chair: false, pillows: false };
+    return data[code];
+  }
+
+  function collect(unitRows, swapRows) {
+    data = {};
+    unitRows.slice(1).forEach(function (r) {
+      if (UNIT_ARTICLES.indexOf(norm(r[1])) === -1) return;
+      if ((r[15] || '').trim() !== '1') return;
+      var code = colorCode(r[3]);
+      if (!code) return;
+      var e = entry(code);
+      e.qty += 1;
+      if ((r[10] || '').trim() === '1') e.chair = true;
+      if ((r[11] || '').trim() === '1') e.pillows = true;
+    });
+    swapRows.slice(1).forEach(function (r) {
+      if (norm(r[1]) !== SWAP_ARTICLE) return;
+      var q = toNum(r[0]);
+      if (q <= 0) return;
+      var code = colorCode(r[4]);
+      if (!code) return;
+      entry(code).qty += q;
+    });
+  }
+
+  function render() {
+    codes.forEach(function (code) {
+      var c = cards[code];
+      var d = data[code];
+      var inStock = !!(d && d.qty > 0);
+      c.el.className = 'card' + (inStock ? '' : ' out');
+      c.qty.textContent = inStock ? d.qty : 0;
+      c.chair.textContent = mark(inStock && d.chair);
+      c.pillows.textContent = mark(inStock && d.pillows);
+      (inStock ? gridIn : gridOut).appendChild(c.el);
+      c.el.style.display = (ready && c.ok) ? 'block' : 'none';
+    });
+  }
+
+  function row(label) {
     var r = document.createElement('div');
     r.className = 'gift';
     var t = document.createElement('span');
     t.textContent = label;
     var v = document.createElement('span');
-    v.textContent = value;
-    if (cls) v.className = cls;
     r.appendChild(t);
     r.appendChild(v);
-    return r;
+    return { row: r, val: v };
   }
 
-  function addCard(grid, code, lines) {
-    var el = document.createElement('div');
-    el.className = 'card';
-    el.id = code;
-    el.style.display = 'none';
-    var img = document.createElement('img');
-    img.alt = code;
-    img.src = 'images/' + code + '.png';
-    img.onclick = function () { big.src = img.src; viewer.style.display = 'flex'; };
-    img.onload = function () {
-      el.style.display = 'block';
-      if (location.hash === '#' + code) el.scrollIntoView();
-    };
-    var title = document.createElement('div');
-    title.className = 'code';
-    title.textContent = code;
-    el.appendChild(img);
-    el.appendChild(title);
-    lines.forEach(function (l) { el.appendChild(l); });
-    grid.appendChild(el);
+  for (var i = 1; i <= TOTAL; i++) {
+    (function (code) {
+      codes.push(code);
+      var el = document.createElement('div');
+      el.className = 'card';
+      el.id = code;
+      el.style.display = 'none';
+
+      var img = document.createElement('img');
+      img.alt = code;
+      img.src = 'images/' + code + '.png';
+      img.onclick = function () { big.src = img.src; viewer.style.display = 'flex'; };
+
+      var title = document.createElement('div');
+      title.className = 'code';
+      title.textContent = code;
+
+      var r1 = row('Стілець RS03 у подарунок');
+      var r2 = row('Подушки у подарунок');
+      var rq = row('Кількість повних комплектів з подушкою та стільцем');
+      rq.val.className = 'qty';
+
+      el.appendChild(img);
+      el.appendChild(title);
+      el.appendChild(r1.row);
+      el.appendChild(r2.row);
+      el.appendChild(rq.row);
+      cards[code] = { el: el, ok: false, qty: rq.val, chair: r1.val, pillows: r2.val };
+      gridOut.appendChild(el);
+
+      img.onload = function () {
+        cards[code].ok = true;
+        render();
+        if (ready && location.hash === '#' + code) el.scrollIntoView();
+      };
+    })('FS' + (i < 10 ? '0' + i : i));
   }
 
-  function sortedKeys(obj) { return Object.keys(obj).sort(); }
-
-  function buildUnits(rows) {
-    var map = {};
-    rows.slice(1).forEach(function (r) {
-      if (UNIT_ARTICLES.indexOf(norm(r[1])) === -1) return;
-      if ((r[15] || '').trim() !== '1') return;
-      var code = colorCode(r[3]);
-      if (!code) return;
-      if (!map[code]) map[code] = { n: 0, chair: false, pillows: false };
-      map[code].n += 1;
-      if ((r[10] || '').trim() === '1') map[code].chair = true;
-      if ((r[11] || '').trim() === '1') map[code].pillows = true;
+  Promise.all([fetchSheet('Установки'), fetchSheet('Сменные')])
+    .then(function (res) {
+      collect(res[0], res[1]);
+      ready = true;
+      document.getElementById('msg').style.display = 'none';
+      render();
+    })
+    .catch(function () {
+      document.getElementById('msg').textContent = 'Не вдалося завантажити дані';
     });
-    var grid = document.getElementById('gridUnits');
-    var keys = sortedKeys(map);
-    document.getElementById('msgUnits').textContent = keys.length ? '' : 'Наразі немає в наявності';
-    keys.forEach(function (code) {
-      var d = map[code];
-      addCard(grid, code, [
-        row('Стілець RS03 у подарунок', mark(d.chair)),
-        row('Подушки у подарунок', mark(d.pillows)),
-        row('Кількість', d.n, 'qty')
-      ]);
-    });
-  }
-
-  function buildSwap(rows) {
-    var map = {};
-    rows.slice(1).forEach(function (r) {
-      if (norm(r[1]) !== SWAP_ARTICLE) return;
-      var qty = toNum(r[0]);
-      if (qty <= 0) return;
-      var code = colorCode(r[4]);
-      if (!code) return;
-      map[code] = (map[code] || 0) + qty;
-    });
-    var grid = document.getElementById('gridSwap');
-    var keys = sortedKeys(map);
-    document.getElementById('msgSwap').textContent = keys.length ? '' : 'Наразі немає в наявності';
-    keys.forEach(function (code) {
-      addCard(grid, code, [row('Кількість', map[code], 'qty')]);
-    });
-  }
-
-  fetchSheet('Установки').then(buildUnits).catch(function () {
-    document.getElementById('msgUnits').textContent = 'Не вдалося завантажити дані';
-  });
-  fetchSheet('Сменные').then(buildSwap).catch(function () {
-    document.getElementById('msgSwap').textContent = 'Не вдалося завантажити дані';
-  });
 </script>
 </body>
 </html>
