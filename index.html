@@ -4,7 +4,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Стоматологічна установка KLT 6220 A3</title>
+<title>Наличие цветов KLT 6220 A3</title>
 
 <style>
 body {
@@ -105,17 +105,17 @@ h2 {
 
 <body>
 
-<h1>Стоматологічна установка KLT 6220 A3</h1>
-<h2>Наявність кольорів</h2>
+<h1>Установка KLT 6220 A3</h1>
+<h2>Наличие цветов отображается с учётом того, что можно заменить подарочный стул на стул с остатков, а сменные комплекты можно взять с установок с не забронированым цветом <h2>
 
 
-<h2>✅ В наявності</h2>
+<h2>✅ В наличии</h2>
 <div class="grid" id="gridIn"></div>
 
-<h2>❌ Немає в наявності</h2>
+<h2>❌ Нет в наличии</h2>
 <div class="grid" id="gridOut"></div>
 
-<div class="msg" id="msg">Завантаження...</div>
+<div class="msg" id="msg">Загрузка...</div>
 
 <div id="viewer">
  <img alt="">
@@ -333,10 +333,10 @@ for (var i = 1; i <= TOTAL; i++) {
   title.textContent = code;
   
   
-  var r2 = row('Стілець RS03 у подарунок');
-  var r1 = row('Подушки у подарунок');
+  var r2 = row('Стул RS03 в подарок');
+  var r1 = row('Подушки в подарок');
 
-  var rq = row('Кількість повних комплектів з подушками та стільцем');
+  var rq = row('Кол-во полных комплектов с подушками и стулом');
   rq.val.className = 'qty';
 
   el.appendChild(img);
@@ -393,7 +393,7 @@ fetchSheet()
   console.error(error);
 
   document.getElementById('msg').textContent =
-   'Не вдалося завантажити дані';
+   'Не удалось загрузить данные';
 
  });
 
