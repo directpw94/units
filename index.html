@@ -55,14 +55,11 @@ h2 {
 }
 
 .code {
+ display: flex;
+ justify-content: space-between;
+ gap: 6px;
  margin: 8px 0;
  font-weight: bold;
- text-align: center;
-}
-
-.code .cnt {
- color: #2a7de1;
- margin-left: 6px;
 }
 
 .gift {
@@ -80,10 +77,6 @@ h2 {
 .out img {
  filter: grayscale(1);
  opacity: .6;
-}
-
-.out .code .cnt {
- color: #888;
 }
 
 .msg {
@@ -225,6 +218,10 @@ function toNum(s) {
  return isNaN(n) ? 0 : n;
 }
 
+function pcs(n) {
+ return n + ' шт.';
+}
+
 function fetchSheet() {
  return fetch(sheetUrl())
   .then(function (r) {
@@ -277,13 +274,13 @@ function render() {
 
   c.el.className = 'card' + (inStock ? '' : ' out');
 
-  c.cnt.textContent = '· ' + d.avail + ' шт.';
+  c.cnt.textContent = pcs(d.avail);
 
-  c.qty.textContent = Math.min(d.pillows, d.chairs);
+  c.qty.textContent = pcs(Math.min(d.pillows, d.chairs));
 
-  c.val01.textContent = d.pillows;
+  c.val01.textContent = pcs(d.pillows);
 
-  c.rs03.textContent = d.chairs;
+  c.rs03.textContent = pcs(d.chairs);
 
   (inStock ? gridIn : gridOut).appendChild(c.el);
 
@@ -302,6 +299,7 @@ function row(label) {
  t.textContent = label;
 
  var v = document.createElement('span');
+ v.style.whiteSpace = 'nowrap';
 
  r.appendChild(t);
  r.appendChild(v);
@@ -341,7 +339,7 @@ for (var i = 1; i <= TOTAL; i++) {
   titleText.textContent = code;
 
   var cnt = document.createElement('span');
-  cnt.className = 'cnt';
+  cnt.style.whiteSpace = 'nowrap';
 
   title.appendChild(titleText);
   title.appendChild(cnt);
