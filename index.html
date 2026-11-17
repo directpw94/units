@@ -211,6 +211,10 @@ function pcs(n) {
  return n + ' шт.';
 }
 
+function chairsText(a, b) {
+ return b > 0 ? a + ' (+' + b + ') шт.' : a + ' шт.';
+}
+
 function fetchSheet() {
  return fetch(sheetUrl())
   .then(function (r) {
@@ -236,7 +240,8 @@ function collect(rows) {
   data[code] = {
    avail: toNum(r[1]),
    pillows: toNum(r[2]),
-   chairs: toNum(r[3])
+   chairs: toNum(r[3]),
+   chairsExtra: toNum(r[4])
   };
 
  });
@@ -252,7 +257,8 @@ function render() {
   var d = data[code] || {
    avail: 0,
    pillows: 0,
-   chairs: 0
+   chairs: 0,
+   chairsExtra: 0
   };
 
   var inStock = d.avail > 0;
@@ -263,7 +269,7 @@ function render() {
 
   c.val01.textContent = pcs(d.pillows);
 
-  c.rs03.textContent = pcs(d.chairs);
+  c.rs03.textContent = chairsText(d.chairs, d.chairsExtra);
 
   (inStock ? gridIn : gridOut).appendChild(c.el);
 
