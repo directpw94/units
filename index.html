@@ -70,10 +70,6 @@ h2 {
  margin-top: 4px;
 }
 
-.qty {
- font-weight: bold;
-}
-
 .out img {
  filter: grayscale(1);
  opacity: .6;
@@ -195,13 +191,6 @@ function parseCSV(text) {
  return rows;
 }
 
-function norm(s) {
- return (s || '')
-  .replace(/\s+/g, ' ')
-  .trim()
-  .toUpperCase();
-}
-
 function colorCode(s) {
  return (s || '')
   .replace(/\s+/g, '')
@@ -244,14 +233,10 @@ function collect(rows) {
 
   if (!/^FS\d{2}$/.test(code)) return;
 
-  var count = toNum(r[1]);
-  var val01 = toNum(r[2]);
-  var rs03 = toNum(r[3]);
-
   data[code] = {
-   avail: count,
-   pillows: val01,
-   chairs: rs03
+   avail: toNum(r[1]),
+   pillows: toNum(r[2]),
+   chairs: toNum(r[3])
   };
 
  });
@@ -275,8 +260,6 @@ function render() {
   c.el.className = 'card' + (inStock ? '' : ' out');
 
   c.cnt.textContent = pcs(d.avail);
-
-  c.qty.textContent = pcs(Math.min(d.pillows, d.chairs));
 
   c.val01.textContent = pcs(d.pillows);
 
@@ -347,20 +330,15 @@ for (var i = 1; i <= TOTAL; i++) {
   var r2 = row('Стул RS03 в подарок');
   var r1 = row('Подушки в подарок');
 
-  var rq = row('Кол-во полных комплектов с подушками и стулом');
-  rq.val.className = 'qty';
-
   el.appendChild(img);
   el.appendChild(title);
   el.appendChild(r2.row);
   el.appendChild(r1.row);
-  el.appendChild(rq.row);
 
   cards[code] = {
    el: el,
    ok: false,
    cnt: cnt,
-   qty: rq.val,
    val01: r1.val,
    rs03: r2.val
   };
