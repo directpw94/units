@@ -104,7 +104,7 @@ h2 {
 
 <h1>Установка KLT 6220 A3</h1>
 <h2>Наличие цветов отображается с учётом того, что можно заменить подарочный стул на стул с остатков, а сменные комплекты можно взять с установок с не забронированым цветом</h2>
-<h2>Кол-во подарочных стульев отображаемое в скобках, это то что можно взять с остатков<h2>
+<h2>Кол-во подарочных стульев и установок, отображаемое в скобках, это то что можно взять с остатков</h2>
 
 <h2>✅ В наличии</h2>
 <div class="grid" id="gridIn"></div>
@@ -241,7 +241,8 @@ function collect(rows) {
    avail: toNum(r[1]),
    pillows: toNum(r[2]),
    chairs: toNum(r[3]),
-   chairsExtra: toNum(r[4])
+   chairsExtra: toNum(r[4]),
+   availExtra: toNum(r[5])
   };
 
  });
@@ -258,14 +259,15 @@ function render() {
    avail: 0,
    pillows: 0,
    chairs: 0,
-   chairsExtra: 0
+   chairsExtra: 0,
+   availExtra: 0
   };
 
   var inStock = d.avail > 0;
 
   c.el.className = 'card' + (inStock ? '' : ' out');
 
-  c.cnt.textContent = pcs(d.avail);
+  c.cnt.textContent = chairsText(d.avail, d.availExtra);
 
   c.val01.textContent = pcs(d.pillows);
 
