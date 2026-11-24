@@ -105,6 +105,7 @@ h2 {
 <h1>Наличие сменных комплектов для Установки KLT 6220 A3</h1>
 <h2>Кол-во доступных цветов, отображаемое в скобках, это то что можно снять с установки с не забронированным цветом</h2>
 <h2>Кол-во подарочных стульев, отображаемое в скобках, это то что можно взять с остатков</h2>
+<h2>Кол-во подушек, отображаемое в скобках, это то что можно взять из установки с не забронированным цветом</h2>
 
 <h2>✅ В наличии</h2>
 <div class="grid" id="gridIn"></div>
@@ -207,10 +208,6 @@ function toNum(s) {
  return isNaN(n) ? 0 : n;
 }
 
-function pcs(n) {
- return n + ' шт.';
-}
-
 function chairsText(a, b) {
  return b > 0 ? a + ' (+' + b + ') шт.' : a + ' шт.';
 }
@@ -242,7 +239,8 @@ function collect(rows) {
    pillows: toNum(r[2]),
    chairs: toNum(r[3]),
    chairsExtra: toNum(r[4]),
-   availExtra: toNum(r[5])
+   availExtra: toNum(r[5]),
+   pillowsExtra: toNum(r[6])
   };
 
  });
@@ -260,7 +258,8 @@ function render() {
    pillows: 0,
    chairs: 0,
    chairsExtra: 0,
-   availExtra: 0
+   availExtra: 0,
+   pillowsExtra: 0
   };
 
   var inStock = d.avail > 0 || d.availExtra > 0;
@@ -269,7 +268,7 @@ function render() {
 
   c.cnt.textContent = chairsText(d.avail, d.availExtra);
 
-  c.val01.textContent = pcs(d.pillows);
+  c.val01.textContent = chairsText(d.pillows, d.pillowsExtra);
 
   c.rs03.textContent = chairsText(d.chairs, d.chairsExtra);
 
