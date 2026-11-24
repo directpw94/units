@@ -263,7 +263,7 @@ function render() {
    availExtra: 0
   };
 
-  var inStock = d.avail > 0;
+  var inStock = d.avail > 0 || d.availExtra > 0;
 
   c.el.className = 'card' + (inStock ? '' : ' out');
 
